@@ -1,4 +1,3 @@
 fastapi[standard]
 uvicorn[standard]
 sqlalchemy
-(Isso permite que qualquer pessoa rode seu projeto com pip install -r requirements.txt)
