@@ -25,5 +25,8 @@ python -m venv venv
 source venv/bin/activate    # No Windows: venv\Scripts\activate
 pip install -r requirements.txt
 fastapi dev main.py         # ou uvicorn main:app --reload
-<img width="1440" height="900" alt="image" src="https://github.com/user-attachments/assets/b34a5dc7-e60e-4d56-9a6f-5e060993ad0f" />
-<img width="1440" height="900" alt="image" src="https://github.com/user-attachments/assets/a967957f-0ed8-4627-aced-69aafdfe33d5" />
+
+```
+<img width="1440" height="900" alt="image" src="https://github.com/user-attachments/assets/5d4ad760-518e-43ed-af59-6eb9d97231f7" />
+<img width="1440" height="900" alt="image" src="https://github.com/user-attachments/assets/ddf87ab7-5b29-4bc9-add3-64247313ad73" />
+<img width="1440" height="900" alt="image" src="https://github.com/user-attachments/assets/ff313e4d-5ec3-48a7-abb3-047bc3a12e34" />
