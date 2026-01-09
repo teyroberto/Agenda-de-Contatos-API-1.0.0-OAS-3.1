@@ -22,4 +22,4 @@ class ContatoDB(Base):
     nome = Column(String, index=True)
     telefone = Column(String, index=True)
     email = Column(String, nullable=True)
-    user_id = Column(Integer)  # Novo! Liga o contato ao usuário dono
+    user_id = Column(Integer)  # Novo campo! Liga o contato ao usuário dono
