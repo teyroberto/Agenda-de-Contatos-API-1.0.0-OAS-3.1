@@ -11,6 +11,7 @@ from database import engine, SessionLocal
 
 # Cria o banco e as tabelas na primeira execução
 models.Base.metadata.create_all(bind=engine)
+print("Tabelas criadas com sucesso (ou já existem)")
 
 app = FastAPI(
     title="Agenda de Contatos API com Usuários Reais",
@@ -204,3 +205,4 @@ def excluir_contato(nome: str, current_user: models.UserDB = Depends(get_current
     db.delete(contato)
     db.commit()
     return {"detail": "Contato excluído com sucesso da sua agenda"}
+
