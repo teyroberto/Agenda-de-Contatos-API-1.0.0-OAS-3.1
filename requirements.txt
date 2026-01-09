@@ -4,4 +4,5 @@ sqlalchemy
 python-jose[cryptography]
 passlib[bcrypt]
 python-multipart
-gunicorn  # Adicione se quiser usar gunicorn (opcional)
+gunicorn
+
