@@ -1,7 +1,7 @@
 from fastapi import FastAPI, HTTPException, Depends, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import List, Optional
 from sqlalchemy.orm import Session
 from jose import JWTError, jwt
@@ -15,27 +15,27 @@ print("Tabelas criadas com sucesso (ou já existem)")
 
 app = FastAPI(
     title="Agenda de Contatos API com Usuários Reais",
-    description="API com autenticação JWT - cada usuário tem sua própria agenda privada",
+    description="API completa com autenticação JWT - cada usuário tem sua agenda privada",
     version="3.0.0"
 )
 
-# Configuração de CORS (permite seu frontend no Netlify + localhost para testes)
+# CORS corrigido: permite seu Netlify e localhost
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "https://meek-eclair-150ccc.netlify.app",  # Seu domínio Netlify
-        "http://localhost:5500",                    # Live Server no VS Code
-        "*"                                         # Temporário para debug (remova depois)
+        "http://localhost:5500",                   # Live Server no VS Code
+        "*"                                        # Temporário para debug (remova depois)
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Configurações de JWT (mude a SECRET_KEY para algo forte!)
-SECRET_KEY = "123456789"  # MUDE ISSO!
+# Configurações JWT (MUDE A SECRET_KEY PARA ALGO FORTE E ÚNICO!)
+SECRET_KEY = "dark-ocean-782"  # Gere uma nova!
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 horas (ajuste conforme quiser)
+ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 horas
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
@@ -49,7 +49,7 @@ class TokenData(BaseModel):
 class UserCreate(BaseModel):
     email: str
     nome: str
-    password: str
+    password: str = Field(..., min_length=6, max_length=72)  # Limite bcrypt seguro
 
 class Contato(BaseModel):
     nome: str
@@ -65,18 +65,14 @@ def get_db():
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None):
     to_encode = data.copy()
-    if expires_delta:
-        expire = datetime.utcnow() + expires_delta
-    else:
-        expire = datetime.utcnow() + timedelta(minutes=15)
+    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
-    return encoded_jwt
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Não foi possível validar as credenciais",
+        detail="Credenciais inválidas",
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
@@ -84,21 +80,20 @@ async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = De
         email: str = payload.get("sub")
         if email is None:
             raise credentials_exception
-        token_data = TokenData(email=email)
     except JWTError:
         raise credentials_exception
-    user = db.query(models.UserDB).filter(models.UserDB.email == token_data.email).first()
+    
+    user = db.query(models.UserDB).filter(models.UserDB.email == email).first()
     if user is None:
         raise credentials_exception
     return user
 
-# Rota raiz melhorada
+# Rota raiz bonita
 @app.get("/")
 def read_root():
     return {
         "message": "Bem-vindo à Agenda de Contatos API! 🚀",
-        "description": "API completa e persistente com autenticação JWT. "
-                       "Cada usuário tem sua agenda privada e segura! 🔒",
+        "description": "API completa com autenticação JWT - cada usuário tem sua agenda privada e segura 🔒",
         "status": "online e pronto para uso",
         "links": {
             "📄 Documentação interativa (Swagger UI)": "https://agenda-de-contatos-api-100-oas-31-production.up.railway.app/docs",
@@ -109,7 +104,7 @@ def read_root():
         "dica": "Faça login no frontend para acessar sua agenda pessoal! 😄"
     }
 
-# Cadastro de usuário
+# Cadastro de usuário (com limite de senha corrigido)
 @app.post("/register", status_code=status.HTTP_201_CREATED)
 def register(user: UserCreate, db: Session = Depends(get_db)):
     try:
@@ -117,7 +112,8 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
         if db_user:
             raise HTTPException(status_code=400, detail="Email já cadastrado")
         
-        hashed_password = models.pwd_context.hash(user.password)
+        # Hash com truncate seguro (bcrypt aceita no máx 72 bytes)
+        hashed_password = models.pwd_context.hash(user.password[:72])
         new_user = models.UserDB(
             email=user.email,
             nome=user.nome,
@@ -126,10 +122,11 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
         db.add(new_user)
         db.commit()
         db.refresh(new_user)
-        return {"message": "Usuário cadastrado com sucesso! Faça login."}
+        return {"message": "Usuário cadastrado com sucesso! Faça login agora."}
     except Exception as e:
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Erro interno ao cadastrar: {str(e)}")
+
 # Login (retorna token JWT)
 @app.post("/token", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
@@ -140,18 +137,15 @@ def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depend
             detail="Email ou senha incorretos",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
-    )
+    
+    access_token = create_access_token(data={"sub": user.email})
     return {"access_token": access_token, "token_type": "bearer"}
 
-# Listar contatos do usuário logado
+# Rotas protegidas de contatos
 @app.get("/contatos", response_model=List[Contato])
 def listar_contatos(current_user: models.UserDB = Depends(get_current_user), db: Session = Depends(get_db)):
     return db.query(models.ContatoDB).filter(models.ContatoDB.user_id == current_user.id).all()
 
-# Adicionar contato (do usuário logado)
 @app.post("/contatos", response_model=Contato, status_code=status.HTTP_201_CREATED)
 def adicionar_contato(contato: Contato, current_user: models.UserDB = Depends(get_current_user), db: Session = Depends(get_db)):
     db_contato = db.query(models.ContatoDB).filter(
@@ -167,7 +161,6 @@ def adicionar_contato(contato: Contato, current_user: models.UserDB = Depends(ge
     db.refresh(db_contato)
     return db_contato
 
-# Buscar contato do usuário logado
 @app.get("/contatos/{nome}", response_model=Contato)
 def buscar_contato(nome: str, current_user: models.UserDB = Depends(get_current_user), db: Session = Depends(get_db)):
     contato = db.query(models.ContatoDB).filter(
@@ -178,7 +171,6 @@ def buscar_contato(nome: str, current_user: models.UserDB = Depends(get_current_
         raise HTTPException(status_code=404, detail="Contato não encontrado na sua agenda")
     return contato
 
-# Atualizar contato do usuário logado
 @app.put("/contatos/{nome}", response_model=Contato)
 def atualizar_contato(nome: str, contato_atualizado: Contato, current_user: models.UserDB = Depends(get_current_user), db: Session = Depends(get_db)):
     contato = db.query(models.ContatoDB).filter(
@@ -195,7 +187,6 @@ def atualizar_contato(nome: str, contato_atualizado: Contato, current_user: mode
     db.refresh(contato)
     return contato
 
-# Excluir contato do usuário logado
 @app.delete("/contatos/{nome}", response_model=dict)
 def excluir_contato(nome: str, current_user: models.UserDB = Depends(get_current_user), db: Session = Depends(get_db)):
     contato = db.query(models.ContatoDB).filter(
@@ -208,6 +199,3 @@ def excluir_contato(nome: str, current_user: models.UserDB = Depends(get_current
     db.delete(contato)
     db.commit()
     return {"detail": "Contato excluído com sucesso da sua agenda"}
-
-
-
