@@ -40,8 +40,19 @@ def get_db():
 
 @app.get("/")
 def read_root():
-    return {"message": "API da Agenda agora com banco de dados SQLite! Dados persistem para sempre 💾"}
-
+    return {
+        "message": "Bem-vindo à Agenda de Contatos API! 🚀",
+        "description": "API completa e persistente feita com FastAPI + SQLAlchemy + SQLite. "
+                       "Todos os contatos são salvos no banco de dados e sobrevivem mesmo após reiniciar o servidor! 💾",
+        "status": "online e pronto para uso",
+        "links": {
+            "Documentação interativa (Swagger UI)": "https://agenda-de-contatos-api-100-oas-31-production.up.railway.app/docs",
+            "Documentação alternativa (ReDoc)": "https://agenda-de-contatos-api-100-oas-31-production.up.railway.app/redoc",
+            "App Web completo (Frontend bonito)": "https://meek-eclair-150ccc.netlify.app/",
+            "Código fonte no GitHub": "https://github.com/teyroberto/Agenda-de-Contatos-API-1.0.0-OAS-3.1",
+        },
+        "dica": "Acesse /docs para testar todas as rotas diretamente no navegador! 😄"
+    }
 @app.get("/contatos", response_model=List[Contato])
 def listar_contatos(db: Session = Depends(get_db)):
     """Retorna todos os contatos cadastrados"""
@@ -95,3 +106,4 @@ def excluir_contato(nome: str, db: Session = Depends(get_db)):
     db.delete(contato)
     db.commit()
     return {"detail": "Contato excluído com sucesso"}
+
