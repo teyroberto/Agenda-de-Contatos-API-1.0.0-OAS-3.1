@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean
+from sqlalchemy import Column, Integer, String
 from database import Base
-from passlib.context import CryptContext  # Vamos instalar isso depois
+from passlib.context import CryptContext
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -22,4 +22,4 @@ class ContatoDB(Base):
     nome = Column(String, index=True)
     telefone = Column(String, index=True)
     email = Column(String, nullable=True)
-    user_id = Column(Integer)  # Novo campo! Liga o contato ao usuário dono
+    user_id = Column(Integer)  # Novo! Liga o contato ao usuário dono
