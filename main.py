@@ -23,13 +23,15 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "https://meek-eclair-150ccc.netlify.app",  # Seu domínio Netlify
-        "http://localhost:5500",                   # Live Server no VS Code
-        "*"                                        # Temporário para debug (remova depois)
+        "https://meek-eclair-150ccc.netlify.app",  # Seu domínio exato no Netlify
+        "http://localhost:5500",                   # Para testes locais com Live Server
+        "http://127.0.0.1:5500"                    # Variação comum
     ],
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Todos os métodos necessários
+    allow_headers=["Content-Type", "Authorization", "Accept"],  # Headers que o frontend usa
+    expose_headers=["Authorization"],  # Permite que o frontend veja o token
+    max_age=600,  # Cache do preflight por 10 min
 )
 
 # Configurações JWT (MUDE A SECRET_KEY PARA ALGO FORTE E ÚNICO!)
@@ -199,3 +201,6 @@ def excluir_contato(nome: str, current_user: models.UserDB = Depends(get_current
     db.delete(contato)
     db.commit()
     return {"detail": "Contato excluído com sucesso da sua agenda"}
+@app.options("/{path:path}")
+async def options():
+    return {}
