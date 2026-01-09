@@ -40,37 +40,8 @@ function showMainContent() {
   mainContent.style.display = 'block';
 }
 
-// Login
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const email = document.getElementById('loginEmail').value.trim();
-  const password = document.getElementById('loginPassword').value.trim();
-
-  try {
-    const res = await fetch(`${API_URL}/token`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: `username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
-    });
-
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.detail || 'Email ou senha incorretos');
-    }
-
-    const data = await res.json();
-    localStorage.setItem('token', data.access_token);
-    token = data.access_token;
-    showMainContent();
-    loadContacts();
-    alert('Login realizado com sucesso!');
-  } catch (err) {
-    alert('Erro no login: ' + err.message);
-  }
-});
-
-// Cadastro (adicione isso se quiser tela de registro completa)
-document.getElementById('registerForm')?.addEventListener('submit', async (e) => {
+// Cadastro corrigido
+document.getElementById('registerForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   const nome = document.getElementById('registerNome').value.trim();
   const email = document.getElementById('registerEmail').value.trim();
@@ -79,16 +50,59 @@ document.getElementById('registerForm')?.addEventListener('submit', async (e) =>
   try {
     const res = await fetch(`${API_URL}/register`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
       body: JSON.stringify({ nome, email, password })
     });
 
-    if (!res.ok) throw new Error('Erro ao cadastrar (email já existe?)');
+    const data = await res.json();
 
-    alert('Cadastro realizado! Agora faça login.');
+    if (!res.ok) {
+      // Mensagem real do backend (ex: email já existe)
+      throw new Error(data.detail || 'Erro desconhecido no servidor');
+    }
+
+    alert(data.message || 'Cadastro realizado com sucesso! Faça login.');
     showLogin();
   } catch (err) {
-    alert('Erro no cadastro: ' + err.message);
+    // Erro claro: rede, CORS, etc.
+    console.error('Erro completo no cadastro:', err);
+    alert(`Erro no cadastro: ${err.message}\nVerifique console (F12) para detalhes.`);
+  }
+});
+
+// Login corrigido (similar)
+document.getElementById('loginForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value.trim();
+
+  try {
+    const res = await fetch(`${API_URL}/token`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Accept': 'application/json'
+      },
+      body: `username=${encodeURIComponent(email)}&password=${encodeURIComponent(password)}`
+    });
+
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.detail || 'Email ou senha incorretos');
+    }
+
+    const data = await res.json();
+    localStorage.setItem('token', data.access_token);
+    token = data.access_token;
+    showMainContent();
+    loadContacts();
+    alert('Login realizado!');
+  } catch (err) {
+    console.error('Erro completo no login:', err);
+    alert(`Erro no login: ${err.message}`);
   }
 });
 
@@ -178,3 +192,4 @@ window.addEventListener('click', (e) => {
 
 // Carregar ao iniciar
 if (token) loadContacts();
+
