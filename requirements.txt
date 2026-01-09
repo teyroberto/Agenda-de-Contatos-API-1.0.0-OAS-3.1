@@ -1,5 +1,7 @@
 fastapi[standard]
 uvicorn[standard]
 sqlalchemy
-gunicorn
-
+python-jose[cryptography]
+passlib[bcrypt]
+python-multipart
+gunicorn main:app -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT
