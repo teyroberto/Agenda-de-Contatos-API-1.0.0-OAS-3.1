@@ -26,6 +26,7 @@ app.add_middleware(
         "https://meek-eclair-150ccc.netlify.app",  # Seu domínio exato no Netlify
         "http://localhost:5500",                   # Para testes locais com Live Server
         "http://127.0.0.1:5500"                    # Variação comum
+        "http://127.0.0.1:5500"
     ],
     allow_credentials=True,
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],  # Todos os métodos necessários
@@ -204,3 +205,4 @@ def excluir_contato(nome: str, current_user: models.UserDB = Depends(get_current
 @app.options("/{path:path}")
 async def options():
     return {}
+
