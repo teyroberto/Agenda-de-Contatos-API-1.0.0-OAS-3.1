@@ -33,7 +33,7 @@ app.add_middleware(
 )
 
 # Configurações de JWT (mude a SECRET_KEY para algo forte!)
-SECRET_KEY = "sua-chave-secreta-super-forte-32-ou-mais-caracteres-2026"  # MUDE ISSO!
+SECRET_KEY = "123456789"  # MUDE ISSO!
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 1440  # 24 horas (ajuste conforme quiser)
 
@@ -208,5 +208,6 @@ def excluir_contato(nome: str, current_user: models.UserDB = Depends(get_current
     db.delete(contato)
     db.commit()
     return {"detail": "Contato excluído com sucesso da sua agenda"}
+
 
 
