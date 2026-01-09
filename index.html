@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Agenda de Contatos</title>
+  <link rel="stylesheet" href="style.css"/>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet"/>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>Minha Agenda de Contatos</h1>
+      <button id="addBtn" class="btn primary">+ Novo Contato</button>
+    </header>
+
+    <div id="contactsList" class="contacts-grid"></div>
+  </div>
+
+  <!-- Modal para adicionar/editar -->
+  <div id="contactModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2 id="modalTitle">Adicionar Contato</h2>
+      <form id="contactForm">
+        <input type="hidden" id="editNomeOriginal" />
+        <label for="nome">Nome:</label>
+        <input type="text" id="nome" required />
+
+        <label for="telefone">Telefone:</label>
+        <input type="tel" id="telefone" required />
+
+        <label for="email">Email (opcional):</label>
+        <input type="email" id="email" />
+
+        <button type="submit" class="btn primary">Salvar</button>
+      </form>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
