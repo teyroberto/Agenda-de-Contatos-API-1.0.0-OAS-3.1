@@ -9,18 +9,48 @@
 </head>
 <body>
   <div class="container">
-    <header>
-      <h1>Minha Agenda de Contatos</h1>
-      <button id="addBtn" class="btn primary">+ Novo Contato</button>
-    </header>
+    <!-- Tela de Login (inicial) -->
+    <div id="loginScreen" class="auth-screen">
+      <h1>Bem-vindo à sua Agenda</h1>
+      <form id="loginForm">
+        <h2>Login</h2>
+        <input type="email" id="loginEmail" placeholder="Seu email" required />
+        <input type="password" id="loginPassword" placeholder="Senha" required />
+        <button type="submit" class="btn primary">Entrar</button>
+      </form>
+      <p>Não tem conta? <button id="showRegister" class="link-btn">Cadastre-se</button></p>
+    </div>
 
-    <div id="contactsList" class="contacts-grid"></div>
+    <!-- Tela de Cadastro -->
+    <div id="registerScreen" class="auth-screen" style="display:none;">
+      <h1>Criar Conta</h1>
+      <form id="registerForm">
+        <input type="text" id="registerNome" placeholder="Seu nome" required />
+        <input type="email" id="registerEmail" placeholder="Seu email" required />
+        <input type="password" id="registerPassword" placeholder="Senha" required />
+        <button type="submit" class="btn primary">Cadastrar</button>
+      </form>
+      <p>Já tem conta? <button id="showLogin" class="link-btn">Fazer login</button></p>
+    </div>
+
+    <!-- Conteúdo principal (após login) -->
+    <div id="mainContent" style="display:none;">
+      <header>
+        <h1>Minha Agenda de Contatos</h1>
+        <div>
+          <span id="userGreeting"></span>
+          <button id="logoutBtn" class="btn danger">Sair</button>
+        </div>
+      </header>
+      <button id="addBtn" class="btn primary">+ Novo Contato</button>
+      <div id="contactsList" class="contacts-grid"></div>
+    </div>
   </div>
 
-  <!-- Modal para adicionar/editar -->
+  <!-- Modal para adicionar/editar contato -->
   <div id="contactModal" class="modal">
     <div class="modal-content">
-      <span class="close-btn">&times;</span>
+      <span class="close-btn">×</span>
       <h2 id="modalTitle">Adicionar Contato</h2>
       <form id="contactForm">
         <input type="hidden" id="editNomeOriginal" />
