@@ -110,23 +110,26 @@ def read_root():
     }
 
 # Cadastro de usuário
-@app.post("/register", response_model=dict)
+@app.post("/register", status_code=status.HTTP_201_CREATED)
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    db_user = db.query(models.UserDB).filter(models.UserDB.email == user.email).first()
-    if db_user:
-        raise HTTPException(status_code=400, detail="Email já cadastrado")
-    
-    hashed_password = models.pwd_context.hash(user.password)
-    new_user = models.UserDB(
-        email=user.email,
-        nome=user.nome,
-        hashed_password=hashed_password
-    )
-    db.add(new_user)
-    db.commit()
-    db.refresh(new_user)
-    return {"message": "Usuário cadastrado com sucesso! Faça login para acessar sua agenda."}
-
+    try:
+        db_user = db.query(models.UserDB).filter(models.UserDB.email == user.email).first()
+        if db_user:
+            raise HTTPException(status_code=400, detail="Email já cadastrado")
+        
+        hashed_password = models.pwd_context.hash(user.password)
+        new_user = models.UserDB(
+            email=user.email,
+            nome=user.nome,
+            hashed_password=hashed_password
+        )
+        db.add(new_user)
+        db.commit()
+        db.refresh(new_user)
+        return {"message": "Usuário cadastrado com sucesso! Faça login."}
+    except Exception as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Erro interno ao cadastrar: {str(e)}")
 # Login (retorna token JWT)
 @app.post("/token", response_model=Token)
 def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
@@ -205,4 +208,5 @@ def excluir_contato(nome: str, current_user: models.UserDB = Depends(get_current
     db.delete(contato)
     db.commit()
     return {"detail": "Contato excluído com sucesso da sua agenda"}
+
 
