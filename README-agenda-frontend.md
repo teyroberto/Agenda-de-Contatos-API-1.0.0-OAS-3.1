@@ -8,5 +8,5 @@ Acesse agora: https://meek-eclair-150ccc.netlify.app/
 
 Demonstração:
 
-![App rodando com contatos](<img width="1440" height="900" alt="image" src="https://github.com/user-attachments/assets/2f2641df-cc79-4f5b-9ea6-410b77fef3b1" />
-)
+<img width="1440" height="900" alt="image" src="https://github.com/user-attachments/assets/4bf899b9-5440-409a-a742-6778b0a8ff32" />
+
